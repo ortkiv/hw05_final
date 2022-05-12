@@ -1,3 +1,30 @@
-# hw05_final
+# **yatube_project**
+## **«Социальная сеть блогеров»**
+## Описание
+```
+Благодаря этому проекту блогеры из разных городов смогут общаться между собой
+дистанционно, размещать на своих страницах записи, реагировать на записи других
+блогеров и коментировать их.
+```
+___
+## Технологии
+```
+Python 3.7 
+Django 2.2.19
+```
+## Запуск проекта в dev-режиме
+```
+Установите и активируйте виртуальное окружение
+Установите зависимости из файла requirements.txt
+```
+### pip install -r requirements.txt
+```
+В папке с файлом manage.py выполните команду:
+```
+### python3 manage.py runserver
+___
 
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+## Авторы
+
+### Виктор Антонов
+[git_hub](https://github.com/ortkiv)

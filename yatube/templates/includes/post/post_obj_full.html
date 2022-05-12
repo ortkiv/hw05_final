@@ -1,0 +1,6 @@
+{% include "includes/post/post.html" %}
+{% include "includes/link_on_post.html" %}
+{% if post.group and not post.group.slug in request.path %}
+  {% include "includes/link_on_group.html" %}
+{% endif %}
+{% if not forloop.last %}<hr>{% endif %}
