@@ -203,10 +203,13 @@ def follow_index(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def profile_follow(request, username):
-    author = get_object_or_404(User, username=username)
-    follower = request.user
-    Follow.objects.create(user=follower, author=author)
-    return redirect("posts:profile", username)
+    if username != request.user.username:
+        author = get_object_or_404(User, username=username)
+        follower = request.user
+        Follow.objects.create(user=follower, author=author)
+        return redirect("posts:profile", username)
+    else:
+        return redirect("posts:profile", username)
 
 
 @login_required

@@ -63,7 +63,7 @@ class PostViewTests(TestCase):
         )
         cls.follow = Follow.objects.create(
             user=cls.user,
-            author=cls.user
+            author=cls.user_two
         )
 
     @classmethod
@@ -196,6 +196,11 @@ class PostViewTests(TestCase):
         """Проверка что новый пост пользователя появляется
         в ленте тех, кто на него подписан.
         """
+        self.authorized_client.force_login(PostViewTests.user_two)
+        Follow.objects.create(
+            user=PostViewTests.user_two,
+            author=PostViewTests.user
+        )
         response = self.authorized_client.get(reverse("posts:follow_index"))
         self.assertIn(PostViewTests.post, response.context["page_obj"])
 
@@ -203,7 +208,6 @@ class PostViewTests(TestCase):
         """Проверка что новый пост пользователя не появляется
         в ленте тех, кто на него не подписан.
         """
-        Follow.objects.filter(user=PostViewTests.user).delete()
         response = self.authorized_client.get(reverse("posts:follow_index"))
         self.assertNotIn(PostViewTests.post, response.context["page_obj"])
 
@@ -234,10 +238,25 @@ class PostViewTests(TestCase):
         print(a)
         self.authorized_client.get(reverse(
             "posts:profile_unfollow",
-            kwargs={"username": PostViewTests.user}
+            kwargs={"username": PostViewTests.user_two}
         ))
         a = Follow.objects.count()
         print(a)
+        self.assertFalse(
+            Follow.objects.filter(
+                user=PostViewTests.user,
+                author=PostViewTests.user_two
+            ).exists()
+        )
+
+    def test_can_not_subscribe_yourself(self):
+        """Проверка пользователь не может подписаться
+        сам на себя.
+        """
+        self.authorized_client.get(reverse(
+            "posts:profile_follow",
+            kwargs={"username": PostViewTests.user}
+        ))
         self.assertFalse(
             Follow.objects.filter(
                 user=PostViewTests.user,
