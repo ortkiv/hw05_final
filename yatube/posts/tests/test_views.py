@@ -264,6 +264,20 @@ class PostViewTests(TestCase):
             ).exists()
         )
 
+    def test_can_not_subscribe_twice(self):
+        """Проверка пользователь не может подписаться
+        дважды на одного пользователя.
+        """
+        follow_count = Follow.objects.count()
+        self.authorized_client.get(reverse(
+            "posts:profile_follow",
+            kwargs={"username": PostViewTests.user_two}
+        ))
+        self.assertEqual(
+            follow_count,
+            Follow.objects.count()
+        )
+
 
 class PaginatorViewsTest(TestCase):
     @classmethod
