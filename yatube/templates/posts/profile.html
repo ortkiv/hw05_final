@@ -5,7 +5,9 @@
     <h1>Все посты пользователя {{ author.get_full_name }} </h1>
     <h3>Всего постов: {{ author.posts.count }} </h3>
     {% include 'includes/paginator.html' %}
-    {% include 'includes/if_following.html' %}
+    {% if request.user != author %}
+      {% include 'includes/if_following.html' %}
+    {% endif %}
     {% for post in page_obj %}
       {% include "includes/post/post_obj_full.html" %}
     {% endfor %}
