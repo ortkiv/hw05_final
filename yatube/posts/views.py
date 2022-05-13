@@ -203,22 +203,20 @@ def follow_index(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def profile_follow(request, username):
-    """"""
+    """Подписка на автора."""
     if username != request.user.username:
         author = get_object_or_404(User, username=username)
-        following = author.following.select_related("user", "author")
-        for obj in following:
-            if obj.user != request.user:
-                follower = request.user
-                Follow.objects.create(user=follower, author=author)
-                return redirect("posts:profile", username)
+        if Follow.objects.filter(user=request.user, author=author).exists():
             return redirect("posts:profile", username)
-    else:
-        return redirect("posts:profile", username)
+        else:
+            Follow.objects.create(user=request.user, author=author)
+            return redirect("posts:profile", username)
+    return redirect("posts:profile", username)
 
 
 @login_required
 def profile_unfollow(request, username):
+    """Отписка от автора."""
     author = get_object_or_404(User, username=username)
     follow = get_object_or_404(Follow, user=request.user, author=author)
     follow.delete()

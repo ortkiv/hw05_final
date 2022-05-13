@@ -32,6 +32,7 @@ class PostViewTests(TestCase):
         super().setUpClass()
         cls.user = User.objects.create_user(username='auth')
         cls.user_two = User.objects.create_user(username='auth_2')
+        cls.user_three = User.objects.create_user(username='auth_3')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='slug',
@@ -215,14 +216,10 @@ class PostViewTests(TestCase):
         """Проверка авторизованный пользователь может
         подписываться на других авторов.
         """
-        a = Follow.objects.count()
-        print(a)
         self.authorized_client.get(reverse(
             "posts:profile_follow",
-            kwargs={"username": PostViewTests.user_two}
+            kwargs={"username": PostViewTests.user_three}
         ))
-        a = Follow.objects.count()
-        print(a)
         self.assertTrue(
             Follow.objects.filter(
                 user=PostViewTests.user,
@@ -234,14 +231,10 @@ class PostViewTests(TestCase):
         """Проверка авторизованный пользователь может
         отписываться от других авторов.
         """
-        a = Follow.objects.count()
-        print(a)
         self.authorized_client.get(reverse(
             "posts:profile_unfollow",
             kwargs={"username": PostViewTests.user_two}
         ))
-        a = Follow.objects.count()
-        print(a)
         self.assertFalse(
             Follow.objects.filter(
                 user=PostViewTests.user,
