@@ -96,15 +96,16 @@ class PostCreateFormTests(TestCase):
             data=form_data,
             follow=True
         )
-        post = Post.objects.get(pk=1)
-        self.assertEqual(
-            (post.text, post.author, post.group.id),
-            (form_data["text"], self.user, form_data["group"])
+        self.assertTrue(
+            Post.objects.filter(
+                text='Изменённый тестовый пост',
+                group=PostCreateFormTests.group.id
+            ).exists()
         )
         self.assertEqual(Post.objects.count(), post_count)
 
     def test_post_comment_in(self):
-        """Тест пост создаётся."""
+        """Тест коментарий создаётся."""
         comment_count = PostCreateFormTests.post.comments.count()
         form_data = {
             "text": "Первый коментарий"

@@ -96,7 +96,7 @@ def post_detail(request: HttpRequest, post_id: int) -> HttpResponse:
             запрашиваемого поста.
     """
     post = get_object_or_404(Post, pk=post_id)
-    form_comment = CommentForm(request.POST or None)
+    form_comment = CommentForm()
     comments = post.comments.all
     return render(
         request, "posts/post_detail.html",
@@ -166,7 +166,16 @@ def post_edit(request: HttpRequest, post_id: int) -> HttpResponse:
 
 
 @login_required
-def add_comment(request, post_id):
+def add_comment(request: HttpRequest, post_id: int) -> HttpResponse:
+    """Добавляет коментарий к запрашиваемому посту
+    --------
+        Параметры:
+            request: HttpRequest
+                обьект запроса
+                post_id: int
+                переменная, содержащая primary key
+            коментируемого поста.
+    """
     post = get_object_or_404(Post, pk=post_id)
     form = CommentForm(request.POST or None)
     if form.is_valid():
@@ -190,12 +199,7 @@ def follow_index(request: HttpRequest) -> HttpResponse:
             request: HttpRequest
                 обьект запроса.
     """
-    subscriptions = request.user.follower.select_related("user", "author")
-    author_list = [obj.author for obj in subscriptions]
-    post_list = Post.objects.select_related(
-        'author',
-        'group'
-    ).filter(author__in=author_list)
+    post_list = Post.objects.filter(author__following__user=request.user)
     page_obj = paginate(request, post_list)
     return render(
         request, "posts/follow.html", {"page_obj": page_obj})
@@ -208,9 +212,8 @@ def profile_follow(request, username):
         author = get_object_or_404(User, username=username)
         if Follow.objects.filter(user=request.user, author=author).exists():
             return redirect("posts:profile", username)
-        else:
-            Follow.objects.create(user=request.user, author=author)
-            return redirect("posts:profile", username)
+        Follow.objects.create(user=request.user, author=author)
+        return redirect("posts:profile", username)
     return redirect("posts:profile", username)
 
 

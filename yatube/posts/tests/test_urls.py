@@ -30,11 +30,21 @@ FIELD_PAGES = {
             kwargs={"post_id": 1}): "/auth/login/?next=/posts/1/edit/",
         reverse(
             "posts:add_comment",
-            kwargs={"post_id": 1}): "/auth/login/?next=/posts/1/comment/"
+            kwargs={"post_id": 1}): "/auth/login/?next=/posts/1/comment/",
+        reverse("posts:follow_index"): "/auth/login/?next=/follow/",
+        reverse(
+            "posts:profile_follow",
+            kwargs={"username": "auth"}
+        ): "/auth/login/?next=/profile/auth/follow/",
+        reverse(
+            "posts:profile_unfollow",
+            kwargs={"username": "auth"}
+        ): "/auth/login/?next=/profile/auth/unfollow/"
     },
     "priv_url_status_code": {
         reverse("posts:post_create"): HTTPStatus.OK,
         reverse("posts:post_edit", kwargs={"post_id": 1}): HTTPStatus.OK,
+        reverse("posts:follow_index"): HTTPStatus.OK
     }
 }
 
@@ -97,7 +107,8 @@ class PostURLTests(TestCase):
         """Проверка доступности адресов
         для авторизованных юзеров
         "/create/"
-        "/posts/1/edit/".
+        "/posts/1/edit/"
+        "/follow/".
         Для "...edit/" юзер должен быть
         автором редактируемого поста.
         """
@@ -126,7 +137,8 @@ class PostURLTests(TestCase):
         "/posts/1/"
         "/create/"
         "/posts/1/edit/"
-        "/unexisting_page/".
+        "/unexisting_page/"
+        "/follow/".
         Для "...edit/" юзер должен быть
         автором редактируемого поста.
         """

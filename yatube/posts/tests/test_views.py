@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from posts.models import Follow, Group, Post
+from django.core.cache import cache
 
 from .data import URL_TEMPLATES
 
@@ -335,9 +336,22 @@ class CashViewTests(TestCase):
     def test_cash(self):
         """Тест работоспособности кеша"""
         response = self.authorized_client.get(reverse("posts:index"))
-        CashViewTests.post.delete()
+        form_data = {
+            "text": "Тестовый пост_2"
+        }
+        self.authorized_client.post(
+            reverse("posts:post_create"),
+            data=form_data,
+            follow=True
+        )
         response_1 = self.authorized_client.get(reverse("posts:index"))
         self.assertEqual(
             response.content,
             response_1.content
+        )
+        cache.clear()
+        response_2 = self.authorized_client.get(reverse("posts:index"))
+        self.assertNotEqual(
+            response.content,
+            response_2.content
         )

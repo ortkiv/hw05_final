@@ -15,5 +15,6 @@ URL_TEMPLATES = {
         "posts:post_edit",
         kwargs={"post_id": 1}): "posts/create_post.html",
     reverse("posts:post_create"): "posts/create_post.html",
-    "/unexisting_page/": "core/404.html"
+    "/unexisting_page/": "core/404.html",
+    reverse("posts:follow_index"): "posts/follow.html"
 }

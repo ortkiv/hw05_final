@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from core.models import CreatedModel
 
 User = get_user_model()
 
@@ -50,7 +51,8 @@ class Post(models.Model):
     image = models.ImageField(
         'Картинка',
         upload_to='posts/',
-        blank=True
+        blank=True,
+        null=True
     )
 
     class Meta:
@@ -62,9 +64,8 @@ class Post(models.Model):
         return self.text[:15]
 
 
-class Comment(models.Model):
+class Comment(CreatedModel):
     text = models.TextField("Коментарий", help_text="Оставьте коментарий")
-    created = models.DateTimeField("Дата публикации", auto_now_add=True)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -81,6 +82,9 @@ class Comment(models.Model):
     class Meta:
         verbose_name = "Комментарий"
         verbose_name_plural = "Комментарии"
+
+    def __str__(self):
+        return self.text[:15]
 
 
 class Follow(models.Model):
@@ -100,3 +104,9 @@ class Follow(models.Model):
     class Meta:
         verbose_name = "Подписку"
         verbose_name_plural = "Подписки"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "author"],
+                name="unique_onstraint"
+            )
+        ]
