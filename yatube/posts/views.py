@@ -23,8 +23,8 @@ def index(request: HttpRequest) -> HttpResponse:
             request: HttpRequest
                 обьект запроса.
     """
-    post_list = Post.objects.select_related('author', 'group')
-    page_obj = paginate(request, post_list)
+    posts = Post.objects.select_related('author', 'group')
+    page_obj = paginate(request, posts)
     return render(request, "posts/index.html", {"page_obj": page_obj})
 
 
@@ -43,8 +43,8 @@ def group_posts(request: HttpRequest, slug: SlugField) -> HttpResponse:
                 slug-строка содержащая название запрашиваемой группы.
     """
     group = get_object_or_404(Group, slug=slug)
-    post_list = group.posts.select_related('author', 'group')
-    page_obj = paginate(request, post_list)
+    posts = group.posts.select_related('author', 'group')
+    page_obj = paginate(request, posts)
     return render(
         request,
         "posts/group_list.html",
@@ -70,9 +70,12 @@ def profile(request: HttpRequest, username: str) -> HttpResponse:
                 запрашиваемой страницы.
     """
     author = get_object_or_404(User, username=username)
-    post_list = author.posts.select_related("author", "group")
-    following = author.following.select_related("user", "author")
-    page_obj = paginate(request, post_list)
+    posts = author.posts.select_related("author", "group")
+    following = request.user.is_authenticated and Follow.objects.filter(
+        user=request.user,
+        author=author
+    ).exists()
+    page_obj = paginate(request, posts)
     return render(
         request,
         "posts/profile.html",
@@ -96,11 +99,11 @@ def post_detail(request: HttpRequest, post_id: int) -> HttpResponse:
             запрашиваемого поста.
     """
     post = get_object_or_404(Post, pk=post_id)
-    form_comment = CommentForm()
+    form = CommentForm()
     comments = post.comments.all
     return render(
         request, "posts/post_detail.html",
-        {"post": post, "form_comment": form_comment, "comments": comments}
+        {"post": post, "form": form, "comments": comments}
     )
 
 
@@ -199,8 +202,8 @@ def follow_index(request: HttpRequest) -> HttpResponse:
             request: HttpRequest
                 обьект запроса.
     """
-    post_list = Post.objects.filter(author__following__user=request.user)
-    page_obj = paginate(request, post_list)
+    posts = Post.objects.filter(author__following__user=request.user)
+    page_obj = paginate(request, posts)
     return render(
         request, "posts/follow.html", {"page_obj": page_obj})
 
@@ -208,11 +211,9 @@ def follow_index(request: HttpRequest) -> HttpResponse:
 @login_required
 def profile_follow(request, username):
     """Подписка на автора."""
-    if username != request.user.username:
-        author = get_object_or_404(User, username=username)
-        if Follow.objects.filter(user=request.user, author=author).exists():
-            return redirect("posts:profile", username)
-        Follow.objects.create(user=request.user, author=author)
+    author = get_object_or_404(User, username=username)
+    if author != request.user:
+        Follow.objects.get_or_create(user=request.user, author=author)
         return redirect("posts:profile", username)
     return redirect("posts:profile", username)
 

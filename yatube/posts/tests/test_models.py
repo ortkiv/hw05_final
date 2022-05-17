@@ -47,28 +47,24 @@ class PostModelTest(TestCase):
 
     def test_verbose_name(self):
         """Проверяем, что verbose_name в полях совпадает с ожидаемым."""
-        post = PostModelTest.post
-        group = PostModelTest.group
-        comment = PostModelTest.comment
-        follow = PostModelTest.follow
         verbose_name = {
-            post: {
+            PostModelTest.post: {
                 "text": "Текст поста",
                 "pub_date": "Дата публикации",
                 "author": "Автор"
             },
-            group: {
+            PostModelTest.group: {
                 "title": "Название",
                 "slug": "URL",
                 "description": "Описание"
             },
-            comment: {
+            PostModelTest.comment: {
                 "text": "Коментарий",
                 "created": "Дата публикации",
                 "author": "Автор",
                 "post": "Пост"
             },
-            follow: {
+            PostModelTest.follow: {
                 "user": "Подписчик",
                 "author": "Автор"
             }
@@ -83,22 +79,22 @@ class PostModelTest(TestCase):
 
     def test_help_text(self):
         """Проверяем, что help_text в полях совпадает с ожидаемым."""
-        post = PostModelTest.post
-        group = PostModelTest.group
-        comment = PostModelTest.comment
+        PostModelTest.post
+        PostModelTest.group
+        PostModelTest.comment
         help_texts = {
-            post: {
+            PostModelTest.post: {
                 "text": "Введите текст поста",
                 "group": "Группа, к которой будет относиться пост"
             },
-            group: {
+            PostModelTest.group: {
                 "title": "Введите название группы",
                 "slug": ("Укажите адрес для страницы группы. "
                          "Используйте только латиницу, цифры, "
                          "дефисы и знаки подчёркивания"),
                 "description": "Краткое описание"
             },
-            comment: {
+            PostModelTest.comment: {
                 "text": "Оставьте коментарий"
             }
         }

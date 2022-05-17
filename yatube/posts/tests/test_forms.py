@@ -1,10 +1,9 @@
 import shutil
 import tempfile
-from xml.etree.ElementTree import Comment
-from django.conf import settings
-from django.core.files.uploadedfile import SimpleUploadedFile
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
@@ -74,8 +73,9 @@ class PostCreateFormTests(TestCase):
         self.assertTrue(
             Post.objects.filter(
                 text='Тестовый пост_1',
-                group=PostCreateFormTests.post.group.id,
-                image=PostCreateFormTests.post.image
+                group=PostCreateFormTests.post.group,
+                image=PostCreateFormTests.post.image,
+                author=PostCreateFormTests.user
             ).exists()
         )
 

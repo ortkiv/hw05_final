@@ -6,7 +6,7 @@
       {% include "includes/error_fields.html" %}
       <form method="post" action="{% url 'posts:add_comment' post.id %}">
         {% csrf_token %}
-        {% for field in form_comment %}
+        {% for field in form %}
           {% include "includes/form_fields.html" %}
         {% endfor %}
         <button type="submit" class="btn btn-primary">Отправить</button>
@@ -15,16 +15,23 @@
   </div>
 {% endif %}
 {% for comment in comments %}
-  <div class="media mb-4">
-    <div class="media-body">
-      <h5 class="mt-0">
-        <a href="{% url 'posts:profile' comment.author.username %}">
-          {{ comment.author.username }}
-        </a>
-      </h5>
-        <p>
-         {{ comment.text|linebreaksbr }}
-        </p>
+<div class="row align-items-start">
+  <div class="col">
+    <div class="media mb-4">
+      <div class="media-body">
+        <h5 class="mt-0">
+          <a href="{% url 'posts:profile' comment.author %}">
+            {{ comment.author }}
+          </a>
+        </h5>
+      </div>
     </div>
   </div>
+  <div class="col">
+    Создано: {{ comment.created|date:"d E Y" }}
+  </div>
+</div>
+<p>
+  {{ comment.text|linebreaksbr }}
+  </p>
 {% endfor %} 

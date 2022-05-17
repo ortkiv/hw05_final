@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from django.http import HttpRequest
 
 
-def paginate(request: HttpRequest, post_list):
+def paginate(request: HttpRequest, posts):
     """Выполняет функцию 'пажинации'.
     --------
         Параметры:
@@ -15,6 +15,6 @@ def paginate(request: HttpRequest, post_list):
                 константа, хранящая кол-во постов, разммещаемых
                 на странице. Импортируется из settings.
     """
-    paginator = Paginator(post_list, settings.LIMIT_POSTS)
+    paginator = Paginator(posts, settings.LIMIT_POSTS)
     page_number = request.GET.get('page')
     return paginator.get_page(page_number)

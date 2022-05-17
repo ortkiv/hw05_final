@@ -1,13 +1,15 @@
 import shutil
 import tempfile
-from django.core.files.uploadedfile import SimpleUploadedFile
+
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from posts.models import Follow, Group, Post
-from django.core.cache import cache
+
+from posts.models import Comment, Follow, Group, Post
 
 from .data import URL_TEMPLATES
 
@@ -66,6 +68,11 @@ class PostViewTests(TestCase):
         cls.follow = Follow.objects.create(
             user=cls.user,
             author=cls.user_two
+        )
+        cls.comment = Comment.objects.create(
+            text="Тестовый коментарий",
+            author=cls.user,
+            post=cls.post
         )
 
     @classmethod
@@ -163,6 +170,22 @@ class PostViewTests(TestCase):
         for field, expected_value in attr_post.items():
             with self.subTest(field=field):
                 self.assertEqual(field, expected_value)
+        form_fields = {
+            "text": forms.fields.CharField
+        }
+        for field, expected_value in form_fields.items():
+            with self.subTest(field=field):
+                self.assertIsInstance(
+                    response.context.get("form").fields.get(field),
+                    expected_value
+                )
+        self.assertTrue(
+            Comment.objects.filter(
+                text="Тестовый коментарий",
+                author=PostViewTests.user,
+                post=PostViewTests.post
+            ).exists()
+        )
 
     def test_post_list_index_correct_context(self):
         """Шаблон index формирован с правильным контекстом."""
@@ -184,15 +207,23 @@ class PostViewTests(TestCase):
 
     def test_post_list_profile_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
+        self.authorized_client.force_login(PostViewTests.user_two)
         response = self.authorized_client.get(
             reverse("posts:profile", kwargs={"username": "auth"})
         )
         post = response.context["page_obj"][0]
         self.post_test(post)
-        self.assertIn(
-            PostViewTests.user.id,
-            response.context
-        )
+        page_context = {
+            "following": PostViewTests.follow.id,
+            "post": PostViewTests.post.id,
+            "user": PostViewTests.user.id
+        }
+        for field, expected in page_context.items():
+            with self.subTest(field=field):
+                self.assertIn(
+                    expected,
+                    response.context
+                )
 
     def test_post_follow_in(self):
         """Проверка что новый пост пользователя появляется
@@ -272,6 +303,17 @@ class PostViewTests(TestCase):
             Follow.objects.count()
         )
 
+    def test_post_list_follow_index_correct_context(self):
+        """Шаблон follow_index формирован с правильным контекстом."""
+        Follow.objects.create(
+            user=PostViewTests.user_two,
+            author=PostViewTests.user
+        )
+        self.authorized_client.force_login(PostViewTests.user_two)
+        response = self.authorized_client.get(reverse("posts:follow_index"))
+        post = response.context["page_obj"][0]
+        self.post_test(post)
+
 
 class PaginatorViewsTest(TestCase):
     @classmethod
@@ -336,13 +378,10 @@ class CashViewTests(TestCase):
     def test_cash(self):
         """Тест работоспособности кеша"""
         response = self.authorized_client.get(reverse("posts:index"))
-        form_data = {
-            "text": "Тестовый пост_2"
-        }
-        self.authorized_client.post(
-            reverse("posts:post_create"),
-            data=form_data,
-            follow=True
+        Post.objects.create(
+            text="Тестовый пост 2",
+            group=CashViewTests.group,
+            author=CashViewTests.user
         )
         response_1 = self.authorized_client.get(reverse("posts:index"))
         self.assertEqual(

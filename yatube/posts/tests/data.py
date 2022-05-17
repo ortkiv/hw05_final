@@ -1,5 +1,6 @@
 from django.urls import reverse
 
+
 URL_TEMPLATES = {
     reverse("posts:index"): "posts/index.html",
     reverse(

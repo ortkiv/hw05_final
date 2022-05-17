@@ -5,6 +5,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from posts.models import Group, Post
+
 from .data import URL_TEMPLATES
 
 User = get_user_model()
@@ -93,6 +94,9 @@ class PostURLTests(TestCase):
         "/create/"
         "/posts/<int:post_id>/edit/"
         "posts/<int:post_id>/comment/"
+        "follow/"
+        "profile/<str:username>/follow/"
+        "profile/<str:username>/unfollow/"
         перенаправят анонимного
         пользователя на страницу логина.
         """
