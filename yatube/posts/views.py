@@ -5,7 +5,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import CommentForm, PostForm
-from .models import Follow, Group, Post
+from .models import Follow, Group, Like, Post
 from .utils import paginate
 
 User = get_user_model()
@@ -101,9 +101,16 @@ def post_detail(request: HttpRequest, post_id: int) -> HttpResponse:
     post = get_object_or_404(Post, pk=post_id)
     form = CommentForm()
     comments = post.comments.all
-    return render(
-        request, "posts/post_detail.html",
-        {"post": post, "form": form, "comments": comments}
+    likeing = request.user.is_authenticated and Like.objects.filter(
+        user=request.user,
+        post=post
+    ).exists()
+    return render(request, "posts/post_detail.html", {
+        "post": post,
+        "form": form,
+        "comments": comments,
+        "likeing": likeing
+    }
     )
 
 
@@ -209,7 +216,7 @@ def follow_index(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
-def profile_follow(request, username):
+def profile_follow(request: HttpRequest, username: str) -> HttpResponse:
     """Подписка на автора."""
     author = get_object_or_404(User, username=username)
     if author != request.user:
@@ -219,9 +226,27 @@ def profile_follow(request, username):
 
 
 @login_required
-def profile_unfollow(request, username):
+def profile_unfollow(request: HttpRequest, username: str) -> HttpResponse:
     """Отписка от автора."""
     author = get_object_or_404(User, username=username)
     follow = get_object_or_404(Follow, user=request.user, author=author)
     follow.delete()
     return redirect("posts:profile", username)
+
+
+@login_required
+def post_like(request: HttpRequest, post_id: int) -> HttpResponse:
+    """Реакция на понравившийся пост."""
+    post = get_object_or_404(Post, pk=post_id)
+    Like.objects.get_or_create(user=request.user, post=post)
+    return redirect("posts:post_detail", post_id=post_id)
+
+
+@login_required
+def post_dislike(request: HttpRequest, post_id: int) -> HttpResponse:
+    """Реакция если понравившийся пост
+    перестал нравиться."""
+    post = get_object_or_404(Post, pk=post_id)
+    like = get_object_or_404(Like, user=request.user, post=post)
+    like.delete()
+    return redirect("posts:post_detail", post_id=post_id)

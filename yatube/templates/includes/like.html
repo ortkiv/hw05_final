@@ -1,0 +1,21 @@
+{% if request.user.is_authenticated %}
+  {% if likeing %}
+    <div class="d-flex justify-content-start">
+      <a
+        class="btn btn-md btn-danger"
+        href="{% url 'posts:post_dislike' post.id %}" role="button"
+      >
+      Мне нравится {{ post.liked.count }}
+      </a>
+    </div>
+  {% else %}
+    <div class="d-flex justify-content-start">
+      <a
+        class="btn btn-md btn-primary"
+        href="{% url 'posts:post_like' post.id %}" role="button"
+      >
+        Оценить пост {{ post.liked.count }}
+      </a>
+    </div>
+  {% endif %}
+{% endif %}

@@ -31,13 +31,14 @@
       {% endthumbnail %}
       <p>{{ post.text|linebreaksbr }}</p>
       {% if request.user == post.author %}
-        <div class="d-flex justify-content-start">
+        <div class="d-flex justify-content-end">
           <a href="{% url "posts:post_edit" post.pk %}"
             class="btn btn-primary btn-sm active"
             role="button" aria-pressed="true">
             Редактировать запись</a>
         </div>
       {% endif %}
+      {% include "includes/like.html" %}
       {% include "includes/comment.html" %}
     </article>
   </div>

@@ -111,3 +111,28 @@ class Follow(models.Model):
                 name="unique_onstraint"
             )
         ]
+
+
+class Like(CreatedModel):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Автор",
+        related_name="liked"
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        verbose_name="Пост",
+        related_name="liked"
+    )
+
+    class Meta:
+        verbose_name = "Отметка - нравится"
+        verbose_name_plural = "Отметки - нравится"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "post"],
+                name="unique_constraint"
+            )
+        ]
